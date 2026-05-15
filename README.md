@@ -8,8 +8,8 @@
 
 | Service  | Image |
 |----------|-------|
-| Frontend | [`minhnhat2k44/expense-tracker-front:latest`](https://hub.docker.com/r/minhnhat2k44/expense-tracker-front) |
-| Backend  | [`minhnhat2k44/expense-tracker-back:latest`](https://hub.docker.com/r/minhnhat2k44/expense-tracker-back) |
+| Frontend | [`minhnhat2k44/expense-tracker:front`](https://hub.docker.com/repository/docker/minhnhat2k44/expense-tracker/general) |
+| Backend  | [`minhnhat2k44/expense-tracker:back`](https://hub.docker.com/repository/docker/minhnhat2k44/expense-tracker/general) |
 
 ---
 
@@ -21,7 +21,7 @@
 ### Bước 1 — Clone repo
 
 ```bash
-git clone https://github.com/Just1ND/DevOps_VoMinhNhat.git
+git clone https://github.com/Just1ND/DevOps_VoMinhNhat_DAMH.git
 cd DevOps_VoMinhNhat
 ```
 
@@ -186,5 +186,5 @@ expense-tracker/
 ## 👤 Tác giả
 
 **Võ Minh Nhật**
-- GitHub: [@Just1ND](https://github.com/Just1ND)
-- Docker Hub: [minhnhat2k44](https://hub.docker.com/u/minhnhat2k44)
+- GitHub: [@Just1ND](https://github.com/Just1ND/DevOps_VoMinhNhat_DAMH)
+- Docker Hub: [minhnhat2k44/expense-tracker](https://hub.docker.com/repository/docker/minhnhat2k44/expense-tracker/general)

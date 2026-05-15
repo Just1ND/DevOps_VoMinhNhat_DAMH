@@ -21,7 +21,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: minhnhat2k44/expense-tracker-back:latest
+    image: minhnhat2k44/expense-tracker:back
     container_name: expense_backend
     restart: unless-stopped
     environment:
@@ -45,7 +45,7 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ""
-    image: minhnhat2k44/expense-tracker-front:latest
+    image: minhnhat2k44/expense-tracker:front
     container_name: expense_frontend
     restart: unless-stopped
     ports:
