@@ -1,0 +1,97 @@
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0e1a;
+  --surface:#131629;
+  --surface2:#1c2038;
+  --border:#252945;
+  --income:#22d3a4;
+  --expense:#f87171;
+  --text:#e2e4f3;
+  --muted:#6b7094;
+  --r:14px;
+}
+body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+.root{max-width:900px;margin:0 auto;padding:24px 16px}
+
+/* Header */
+.page-header{margin-bottom:24px}
+.page-title{font-size:26px;font-weight:700;margin-bottom:18px;letter-spacing:-0.5px}
+
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}
+.summary{padding:18px 20px;display:flex;flex-direction:column;gap:6px}
+.s-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.s-amount{font-size:20px;font-weight:700;letter-spacing:-0.5px}
+.summary.income .s-amount{color:var(--income)}
+.summary.expense .s-amount{color:var(--expense)}
+.summary.balance.pos .s-amount{color:var(--income)}
+.summary.balance.neg .s-amount{color:var(--expense)}
+
+/* Main grid */
+.main{display:grid;grid-template-columns:380px 1fr;gap:16px;align-items:start}
+@media(max-width:720px){.main{grid-template-columns:1fr}}
+
+/* Form */
+.form-card{padding:24px}
+.section-title{font-size:15px;font-weight:600;margin-bottom:16px;color:var(--text)}
+.form{display:flex;flex-direction:column;gap:14px}
+
+.type-toggle{display:flex;gap:8px}
+.type-btn{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--border);
+  background:transparent;color:var(--muted);font-family:inherit;font-size:13px;
+  cursor:pointer;transition:all .2s;font-weight:500}
+.type-btn:hover{border-color:var(--text);color:var(--text)}
+.type-btn.active.expense{background:rgba(248,113,113,.12);border-color:var(--expense);color:var(--expense)}
+.type-btn.active.income{background:rgba(34,211,164,.12);border-color:var(--income);color:var(--income)}
+
+.form-row{display:flex;flex-direction:column;gap:5px}
+.label{font-size:12px;color:var(--muted)}
+.input{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;
+  padding:10px 14px;color:var(--text);font-family:inherit;font-size:14px;outline:none;
+  transition:border-color .2s;width:100%}
+.input:focus{border-color:#5b5fc7}
+.input::placeholder{color:var(--muted)}
+.select{cursor:pointer}
+.select option{background:var(--surface2)}
+
+.submit-btn{padding:12px;border:none;border-radius:10px;font-family:inherit;
+  font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.submit-btn.expense{background:var(--expense);color:#0c0e1a}
+.submit-btn.income{background:var(--income);color:#0c0e1a}
+.submit-btn:hover{opacity:.88}
+.submit-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* List */
+.list-card{padding:20px}
+.list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.filters{display:flex;gap:6px}
+.filter-btn{background:transparent;border:1px solid var(--border);border-radius:8px;
+  padding:5px 12px;color:var(--muted);font-family:inherit;font-size:12px;cursor:pointer;transition:all .2s}
+.filter-btn.active,.filter-btn:hover{border-color:var(--text);color:var(--text)}
+
+.error-msg{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:8px;
+  padding:10px 14px;font-size:13px;color:var(--expense);display:flex;justify-content:space-between;
+  align-items:center;margin-bottom:10px}
+.error-msg button{background:none;border:none;color:var(--expense);cursor:pointer;font-size:15px}
+
+.tx-list{display:flex;flex-direction:column;gap:2px;max-height:520px;overflow-y:auto}
+.tx-list::-webkit-scrollbar{width:3px}
+.tx-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+.empty{text-align:center;color:var(--muted);padding:40px 0;font-size:14px}
+
+.tx-item{display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:10px;transition:background .15s}
+.tx-item:hover{background:var(--surface2)}
+.tx-icon{font-size:20px;flex-shrink:0}
+.tx-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.tx-desc{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-meta{font-size:11px;color:var(--muted)}
+.tx-amount{font-size:14px;font-weight:600;flex-shrink:0}
+.tx-amount.income{color:var(--income)}
+.tx-amount.expense{color:var(--expense)}
+
+.del-btn{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;
+  padding:4px 6px;border-radius:6px;opacity:0;transition:all .2s;flex-shrink:0}
+.tx-item:hover .del-btn{opacity:1}
+.del-btn:hover{background:rgba(248,113,113,.15);color:var(--expense)}
