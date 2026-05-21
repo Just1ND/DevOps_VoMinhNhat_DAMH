@@ -6,16 +6,17 @@
 
 ## 🐳 Docker Hub Images
 
-| Service  | Image |
-|----------|-------|
+| Service  | Image                                                                                                                 |
+| -------- | --------------------------------------------------------------------------------------------------------------------- |
 | Frontend | [`minhnhat2k44/expense-tracker:front`](https://hub.docker.com/repository/docker/minhnhat2k44/expense-tracker/general) |
-| Backend  | [`minhnhat2k44/expense-tracker:back`](https://hub.docker.com/repository/docker/minhnhat2k44/expense-tracker/general) |
+| Backend  | [`minhnhat2k44/expense-tracker:back`](https://hub.docker.com/repository/docker/minhnhat2k44/expense-tracker/general)  |
 
 ---
 
 ## 🚀 Chạy ứng dụng
 
 ### Yêu cầu
+
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) đã được cài và đang chạy
 
 ### Bước 1 — Clone repo
@@ -42,9 +43,9 @@ docker compose up -d
 
 ### Bước 4 — Truy cập
 
-| Service  | URL |
-|----------|-----|
-| Frontend | http://localhost |
+| Service     | URL                              |
+| ----------- | -------------------------------- |
+| Frontend    | http://localhost                 |
 | Backend API | http://localhost:3001/api/health |
 
 ### Dừng ứng dụng
@@ -69,10 +70,10 @@ docker compose down
 └─────────────────────────────────────────┘
 ```
 
-| Service  | Image | Port |
-|----------|-------|------|
-| frontend | nginx:alpine | 80 |
-| backend  | node:20-alpine | 3001 |
+| Service  | Image              | Port            |
+| -------- | ------------------ | --------------- |
+| frontend | nginx:alpine       | 80              |
+| backend  | node:20-alpine     | 3001            |
 | db       | postgres:16-alpine | 5432 (internal) |
 
 ---
@@ -146,14 +147,17 @@ jobs:
 ## 🔄 Cập nhật image khi có thay đổi code
 
 ### Nếu đã setup CI/CD
+
 ```bash
 git add .
 git commit -m "update: mô tả thay đổi"
 git push
 ```
+
 > GitHub Actions sẽ tự động build và push lên Docker Hub.
 
 ### Nếu chưa có CI/CD (thủ công)
+
 ```bash
 docker compose build
 docker compose push
@@ -186,5 +190,6 @@ expense-tracker/
 ## 👤 Tác giả
 
 **Võ Minh Nhật**
+
 - GitHub: [@Just1ND](https://github.com/Just1ND/DevOps_VoMinhNhat_DAMH)
-- Docker Hub: [minhnhat2k44/expense-tracker](https://hub.docker.com/repository/docker/minhnhat2k44/expense-tracker/general)
+- Docker Hub: [minhnhat2k44/expense-tracker]
