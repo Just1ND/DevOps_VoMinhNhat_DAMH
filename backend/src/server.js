@@ -1,14 +1,17 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const { Pool } = require('pg');
+// === CÁC THƯ VIỆN & CẤU HÌNH BAN ĐẦU ===
+require('dotenv').config(); // Load các biến môi trường từ file .env
+const express = require('express'); // Framework tạo server web
+const cors = require('cors'); // Middleware cho phép kết nối từ domain khác (Frontend)
+const { Pool } = require('pg'); // Client kết nối cơ sở dữ liệu PostgreSQL
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// === KẾT NỐI & KHỞI TẠO CƠ SỞ DỮ LIỆU (Database) ===
 // ── Database ──────────────────────────────────────────────────────────────────
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
+// Hàm khởi tạo: Tự động tạo bảng 'transactions' nếu chưa tồn tại trong DB
 async function initDB() {
   try {
     await pool.query(`
@@ -28,13 +31,15 @@ async function initDB() {
   }
 }
 
+// === MIDDLEWARE (Xử lý request trước khi vào các Route) ===
 // ── Middleware ────────────────────────────────────────────────────────────────
-app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
-app.use(express.json());
+app.use(cors({ origin: process.env.FRONTEND_URL || '*' })); // Chấp nhận request từ Frontend (tránh lỗi CORS)
+app.use(express.json()); // Phân tích body của request HTTP dưới dạng JSON
 
+// === CÁC API ROUTES (Đường dẫn xử lý yêu cầu từ Client) ===
 // ── Routes ────────────────────────────────────────────────────────────────────
 
-// Health check
+// API 1: Kiểm tra trạng thái hoạt động của Server và Database (Health check)
 app.get('/api/health', async (req, res) => {
   try {
     await pool.query('SELECT 1');
@@ -44,7 +49,7 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// GET all transactions (optional ?type=income|expense)
+// API 2: Lấy danh sách giao dịch (có thể truyền query ?type=income|expense để lọc dữ liệu)
 app.get('/api/transactions', async (req, res) => {
   try {
     const { type } = req.query;
@@ -63,7 +68,7 @@ app.get('/api/transactions', async (req, res) => {
   }
 });
 
-// GET summary: tổng income, expense, balance
+// API 3: Thống kê tổng số tiền thu, chi và số dư hiện tại
 app.get('/api/transactions/summary', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -80,7 +85,7 @@ app.get('/api/transactions/summary', async (req, res) => {
   }
 });
 
-// POST create transaction
+// API 4: Thêm một giao dịch mới (Thu nhập hoặc Chi tiêu)
 app.post('/api/transactions', async (req, res) => {
   const { amount, description, category, type } = req.body;
   if (!amount || !description || !type) {
@@ -105,7 +110,7 @@ app.post('/api/transactions', async (req, res) => {
   }
 });
 
-// DELETE transaction
+// API 5: Xóa một giao dịch cụ thể dựa vào tham số ID
 app.delete('/api/transactions/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -122,9 +127,15 @@ app.delete('/api/transactions/:id', async (req, res) => {
   }
 });
 
+// === KHỞI ĐỘNG SERVER ===
 // ── Start ─────────────────────────────────────────────────────────────────────
-initDB().then(() => {
-  app.listen(PORT, () => console.log(`[SERVER] Running on port ${PORT}`));
-});
+// Chạy hàm khởi tạo Database trước, thành công mới bắt đầu lắng nghe request
+if (require.main === module) {
+  initDB().then(() => {
+    app.listen(PORT, () => console.log(`[SERVER] Running on port ${PORT}`));
+  });
+} else {
+  initDB();
+}
 
 module.exports = app;
