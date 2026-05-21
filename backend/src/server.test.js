@@ -1,5 +1,7 @@
+// === CÁC THƯ VIỆN & CẤU HÌNH MOCK (GIẢ LẬP) CƠ SỞ DỮ LIỆU ===
 const request = require('supertest');
 
+// Giả lập (mock) thư viện 'pg' để không cần kết nối Database thật khi chạy test
 jest.mock('pg', () => {
   const mockPool = { query: jest.fn() };
   return { Pool: jest.fn(() => mockPool) };
@@ -8,14 +10,17 @@ jest.mock('pg', () => {
 const { Pool } = require('pg');
 const pool = new Pool();
 
-// Suppress initDB during tests
+// Ngăn không cho hàm initDB (trong server.js) chạy lệnh SQL thật trong lúc test
 beforeAll(() => {
   pool.query.mockResolvedValue({ rows: [] });
 });
+// Reset (xóa) lại các giá trị mock sau mỗi lần test để tránh ảnh hưởng lẫn nhau
 beforeEach(() => jest.clearAllMocks());
 
+// === CÁC TEST CASES (CÁC TRƯỜNG HỢP KIỂM THỬ) ===
 const app = require('../src/server');
 
+// Kiểm thử API Health check (Kiểm tra trạng thái hệ thống)
 describe('GET /api/health', () => {
   it('trả 200 khi DB kết nối được', async () => {
     pool.query.mockResolvedValue({});
@@ -25,6 +30,7 @@ describe('GET /api/health', () => {
   });
 });
 
+// Kiểm thử API Lấy danh sách giao dịch
 describe('GET /api/transactions', () => {
   it('trả danh sách giao dịch', async () => {
     pool.query.mockResolvedValue({
@@ -36,6 +42,7 @@ describe('GET /api/transactions', () => {
   });
 });
 
+// Kiểm thử API Thêm giao dịch mới
 describe('POST /api/transactions', () => {
   it('tạo giao dịch thành công', async () => {
     pool.query.mockResolvedValue({
@@ -59,6 +66,7 @@ describe('POST /api/transactions', () => {
   });
 });
 
+// Kiểm thử API Xóa giao dịch
 describe('DELETE /api/transactions/:id', () => {
   it('trả 404 khi không tìm thấy', async () => {
     pool.query.mockResolvedValue({ rows: [] });

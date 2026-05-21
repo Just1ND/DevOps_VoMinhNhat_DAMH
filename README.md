@@ -59,15 +59,55 @@ docker compose down
 ## 🏗️ Kiến trúc hệ thống
 
 ```
-┌─────────────────────────────────────────┐
-│              Docker Network             │
-│                                         │
-│  [Browser] → [Frontend :80]             │
-│                    ↓                    │
-│             [Backend :3001]             │
-│                    ↓                    │
-│           [PostgreSQL :5432]            │
-└─────────────────────────────────────────┘
+
+┌─────────────────────────────────┐
+│ Client Browser │
+└──────────────┬──────────────────┘
+│ HTTP :80
+┌──────────────▼──────────────────┐
+│ Frontend (React + Nginx) │
+│ /api/\* → proxy → :3001 │
+└──────────────┬──────────────────┘
+│ HTTP :3001
+┌──────────────▼──────────────────┐
+│ Backend (Node.js + Express) │
+│ /api/health │
+│ /api/transactions │
+└──────────────┬──────────────────┘
+│ TCP :5432
+┌──────────────▼──────────────────┐
+│ Database (PostgreSQL 16) │
+│ volume: pgdata │
+└─────────────────────────────────┘
+
+```
+
+## CI/CD Flow
+
+```
+
+push / pull_request
+│
+▼
+┌───────────────────────────────────┐
+│ GitHub Actions │
+├─────────────┬─────────────────────┤
+│ Backend Job │ Frontend Job │
+│ npm ci │ npm ci │
+│ eslint │ eslint │
+│ jest │ vitest │
+│ docker │ vite build │
+│ build │ docker build │
+└──────┬──────┴──────────┬──────────┘
+│ (cả 2 pass) │
+└────────┬─────────┘
+│ push main only
+▼
+Deploy Job
+SSH vào VPS
+git pull origin main
+docker compose up -d --build
+
 ```
 
 | Service  | Image              | Port            |

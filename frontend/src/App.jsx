@@ -26,14 +26,16 @@ const CATEGORIES = {
 const initForm = { amount: '', description: '', category: 'Ăn uống', type: 'expense' };
 
 export default function App() {
-  const [transactions, setTransactions] = useState([]);
-  const [summary, setSummary]           = useState({ total_income: 0, total_expense: 0, balance: 0 });
-  const [form, setForm]                 = useState(initForm);
-  const [filter, setFilter]             = useState('all');
-  const [loading, setLoading]           = useState(true);
-  const [error, setError]               = useState(null);
-  const [submitting, setSubmitting]     = useState(false);
+  // === CÁC STATE (TRẠNG THÁI) CỦA ỨNG DỤNG ===
+  const [transactions, setTransactions] = useState([]); // Danh sách giao dịch
+  const [summary, setSummary]           = useState({ total_income: 0, total_expense: 0, balance: 0 }); // Tổng quan thu/chi/số dư
+  const [form, setForm]                 = useState(initForm); // Dữ liệu của form thêm mới
+  const [filter, setFilter]             = useState('all'); // Bộ lọc danh sách (tất cả, thu/chi)
+  const [loading, setLoading]           = useState(true); // Trạng thái đang tải dữ liệu
+  const [error, setError]               = useState(null); // Thông báo lỗi nếu có
+  const [submitting, setSubmitting]     = useState(false); // Trạng thái đang gửi dữ liệu lên server
 
+  // === HÀM TẢI DỮ LIỆU: Lấy danh sách giao dịch và tổng quan từ API ===
   const loadAll = useCallback(async () => {
     try {
       setError(null);
@@ -50,17 +52,20 @@ export default function App() {
     }
   }, []);
 
+  // Gọi hàm loadAll() tự động một lần khi ứng dụng vừa khởi chạy
   useEffect(() => { loadAll(); }, [loadAll]);
 
+  // === HÀM XỬ LÝ NHẬP LIỆU: Cập nhật state 'form' khi người dùng gõ vào các ô input ===
   const handleField = (k, v) => {
     setForm(f => {
       const next = { ...f, [k]: v };
-      // Reset category khi đổi type
+      // Tự động reset danh mục (category) về mục đầu tiên khi người dùng đổi loại (type) thu/chi
       if (k === 'type') next.category = CATEGORIES[v][0];
       return next;
     });
   };
 
+  // === HÀM THÊM GIAO DỊCH: Gửi dữ liệu form lên API và cập nhật lại giao diện ===
   const addTx = async (e) => {
     e.preventDefault();
     if (!form.amount || !form.description.trim()) return;
@@ -85,7 +90,9 @@ export default function App() {
     }
   };
 
+  // === HÀM XÓA GIAO DỊCH: Gọi API xóa và tính toán lại tổng quan ===
   const deleteTx = async (tx) => {
+    // Xóa tạm thời trên giao diện (Optimistic update) để phản hồi nhanh
     setTransactions(prev => prev.filter(t => t.id !== tx.id));
     setSummary(prev => {
       const amt = Number(tx.amount);
@@ -100,13 +107,14 @@ export default function App() {
     }
   };
 
+  // === LỌC DỮ LIỆU HIỂN THỊ: Dựa vào state 'filter' (tất cả / thu / chi) ===
   const visible = transactions.filter(t =>
     filter === 'all' ? true : t.type === filter
   );
 
   return (
     <div className="root">
-      {/* ── Summary cards ─── */}
+      {/* === PHẦN 1: HEADER & THỐNG KÊ TỔNG QUAN (Summary cards) === */}
       <header className="page-header">
         <h1 className="page-title">💸 Quản lý chi tiêu</h1>
         <div className="summary-grid">
@@ -126,7 +134,7 @@ export default function App() {
       </header>
 
       <div className="main">
-        {/* ── Add form ─── */}
+        {/* === PHẦN 2: BIỂU MẪU THÊM GIAO DỊCH (Add form) === */}
         <section className="card form-card">
           <h2 className="section-title">Thêm giao dịch</h2>
           <form className="form" onSubmit={addTx}>
@@ -179,7 +187,7 @@ export default function App() {
           </form>
         </section>
 
-        {/* ── Transaction list ─── */}
+        {/* === PHẦN 3: DANH SÁCH LỊCH SỬ GIAO DỊCH (Transaction list) === */}
         <section className="card list-card">
           <div className="list-header">
             <h2 className="section-title">Lịch sử</h2>

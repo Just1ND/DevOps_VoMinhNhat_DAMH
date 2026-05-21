@@ -1,22 +1,24 @@
 version: '3.9'
 
 services:
+  # === 1. DỊCH VỤ CƠ SỞ DỮ LIỆU (PostgreSQL) ===
   db:
     image: postgres:16-alpine
     container_name: expense_db
-    restart: unless-stopped
+    restart: unless-stopped # Tự động khởi động lại container nếu bị lỗi hoặc khởi động lại máy
     environment:
-      POSTGRES_DB: expensetracker
+      POSTGRES_DB: expensetracker # Tên Database mặc định khi khởi tạo
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password} # Lấy mật khẩu từ biến môi trường, mặc định là 'password'
     volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
+      - pgdata:/var/lib/postgresql/data # Lưu trữ dữ liệu DB lâu dài (persistent), không mất khi xóa container
+    healthcheck: # Cấu hình kiểm tra xem DB đã sẵn sàng nhận kết nối hay chưa
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # === 2. DỊCH VỤ BACKEND (Node.js API) ===
   backend:
     build:
       context: ./backend
@@ -26,19 +28,21 @@ services:
     restart: unless-stopped
     environment:
       PORT: 3001
+      # Cấu hình chuỗi kết nối tới service 'db' thông qua mạng nội bộ Docker
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-password}@db:5432/expensetracker
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
     ports:
-      - "3001:3001"
+      - "3001:3001" # Mở cổng 3001 để có thể gọi API trực tiếp nếu cần
     depends_on:
       db:
-        condition: service_healthy
-    healthcheck:
+        condition: service_healthy # Backend chỉ khởi động SAU KHI Database đã báo 'healthy'
+    healthcheck: # Kiểm tra xem server Node.js đã chạy lên thành công chưa
       test: ["CMD-SHELL", "wget -qO- http://localhost:3001/api/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 3
 
+  # === 3. DỊCH VỤ FRONTEND (Nginx phục vụ React/Vite) ===
   frontend:
     build:
       context: ./frontend
@@ -49,10 +53,11 @@ services:
     container_name: expense_frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "80:80" # Publish cổng 80 cho người dùng có thể truy cập qua trình duyệt web
     depends_on:
       backend:
-        condition: service_healthy
+        condition: service_healthy # Chỉ khởi chạy giao diện khi Backend đã sẵn sàng phục vụ API
 
+# Định nghĩa volume để lưu trữ dữ liệu PostgreSQL không bị mất khi xóa container
 volumes:
   pgdata:
