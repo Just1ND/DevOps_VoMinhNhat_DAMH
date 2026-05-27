@@ -10,6 +10,8 @@ services:
       POSTGRES_DB: expensetracker # Tên Database mặc định khi khởi tạo
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password} # Lấy mật khẩu từ biến môi trường, mặc định là 'password'
+    ports:
+      - "5432:5432" # Expose để backend local (npm run dev) có thể kết nối
     volumes:
       - pgdata:/var/lib/postgresql/data # Lưu trữ dữ liệu DB lâu dài (persistent), không mất khi xóa container
     healthcheck: # Cấu hình kiểm tra xem DB đã sẵn sàng nhận kết nối hay chưa
