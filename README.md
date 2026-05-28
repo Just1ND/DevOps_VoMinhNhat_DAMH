@@ -4,6 +4,16 @@
 
 ---
 
+## 🌐 Production URLs
+
+| Service     | URL                                                                                          |
+| ----------- | -------------------------------------------------------------------------------------------- |
+| Frontend    | https://devops-vominhnhat-damh-4.onrender.com                                                |
+| Backend API | https://devops-vominhnhat-damh-3.onrender.com/api/health                                     |
+| GitHub Repo | https://github.com/Just1ND/DevOps_VoMinhNhat_DAMH                                           |
+
+---
+
 ## 🐳 Docker Hub Images
 
 | Service  | Image                                                                                                                 |
@@ -13,7 +23,7 @@
 
 ---
 
-## 🚀 Chạy ứng dụng
+## 🚀 Chạy ứng dụng (Local)
 
 ### Yêu cầu
 
@@ -23,19 +33,27 @@
 
 ```bash
 git clone https://github.com/Just1ND/DevOps_VoMinhNhat_DAMH.git
-cd DevOps_VoMinhNhat
+cd DevOps_VoMinhNhat_DAMH
 ```
 
-### Bước 2 — Tạo file `.env` (tuỳ chọn)
+### Bước 2 — Tạo file `.env`
+
+```bash
+cp .env.example .env
+```
+
+Chỉnh sửa `.env` nếu cần:
 
 ```env
-POSTGRES_PASSWORD=your_password
+POSTGRES_PASSWORD=password
 FRONTEND_URL=http://localhost
+DATABASE_URL=postgresql://postgres:password@localhost:5432/expensetracker
+PORT=3001
 ```
 
 > Nếu không tạo file `.env`, ứng dụng sẽ dùng giá trị mặc định.
 
-### Bước 3 — Chạy bằng Docker Compose
+### Bước 3 — Build và chạy bằng Docker Compose
 
 ```bash
 docker compose up -d
@@ -48,6 +66,18 @@ docker compose up -d
 | Frontend    | http://localhost                 |
 | Backend API | http://localhost:3001/api/health |
 
+### Bước 5 — Xem log container
+
+```bash
+# Xem log tất cả service
+docker compose logs -f
+
+# Xem log từng service
+docker compose logs -f backend
+docker compose logs -f frontend
+docker compose logs -f db
+```
+
 ### Dừng ứng dụng
 
 ```bash
@@ -59,55 +89,25 @@ docker compose down
 ## 🏗️ Kiến trúc hệ thống
 
 ```
-
 ┌─────────────────────────────────┐
-│ Client Browser │
+│         Client Browser          │
 └──────────────┬──────────────────┘
-│ HTTP :80
+               │ HTTP :80
 ┌──────────────▼──────────────────┐
-│ Frontend (React + Nginx) │
-│ /api/\* → proxy → :3001 │
+│    Frontend (React + Nginx)     │
+│    /api/* → proxy → :3001       │
 └──────────────┬──────────────────┘
-│ HTTP :3001
+               │ HTTP :3001
 ┌──────────────▼──────────────────┐
-│ Backend (Node.js + Express) │
-│ /api/health │
-│ /api/transactions │
+│   Backend (Node.js + Express)   │
+│   /api/health                   │
+│   /api/transactions             │
 └──────────────┬──────────────────┘
-│ TCP :5432
+               │ TCP :5432
 ┌──────────────▼──────────────────┐
-│ Database (PostgreSQL 16) │
-│ volume: pgdata │
+│    Database (PostgreSQL 16)     │
+│    volume: pgdata               │
 └─────────────────────────────────┘
-
-```
-
-## CI/CD Flow
-
-```
-
-push / pull_request
-│
-▼
-┌───────────────────────────────────┐
-│ GitHub Actions │
-├─────────────┬─────────────────────┤
-│ Backend Job │ Frontend Job │
-│ npm ci │ npm ci │
-│ eslint │ eslint │
-│ jest │ vitest │
-│ docker │ vite build │
-│ build │ docker build │
-└──────┬──────┴──────────┬──────────┘
-│ (cả 2 pass) │
-└────────┬─────────┘
-│ push main only
-▼
-Deploy Job
-SSH vào VPS
-git pull origin main
-docker compose up -d --build
-
 ```
 
 | Service  | Image              | Port            |
@@ -118,90 +118,54 @@ docker compose up -d --build
 
 ---
 
-## 🛠️ Build & Push lên Docker Hub
+## 🔄 CI/CD Flow
 
-### Build image
-
-```bash
-docker compose build
 ```
-
-### Push lên Docker Hub
-
-```bash
-docker login
-docker compose push
-```
-
-### Build + Push một lệnh (Linux/macOS)
-
-```bash
-docker compose build && docker compose push
-```
-
-### Build + Push một lệnh (Windows PowerShell)
-
-```powershell
-docker compose build; docker compose push
+push / pull_request lên main, dev, feature/*
+               │
+               ▼
+  ┌────────────────────────────────┐
+  │         GitHub Actions         │
+  ├──────────────┬─────────────────┤
+  │ Backend Job  │  Frontend Job   │
+  │   npm ci     │    npm ci       │
+  │   eslint     │    eslint       │
+  │   jest       │    vitest       │
+  │   docker     │    vite build   │
+  │   build      │    docker build │
+  └──────┬───────┴────────┬────────┘
+         │  (cả 2 pass)   │
+         └───────┬─────────┘
+                 │ push main only
+                 ▼
+          Deploy to Render
+     (auto-deploy khi push main)
+          Frontend + Backend
+            live trên cloud
 ```
 
 ---
 
 ## ⚙️ CI/CD với GitHub Actions
 
-File `.github/workflows/docker.yml` tự động build và push image mỗi khi push code lên nhánh `main` hoặc `develop`.
+File `.github/workflows/ci.yml` tự động chạy khi push code:
 
-```yaml
-name: Build & Push Docker
-
-on:
-  push:
-    branches: [main, develop]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: minhnhat2k44
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build & Push
-        run: |
-          docker compose build
-          docker compose push
-```
-
-### Cách thêm Secret vào GitHub
-
-1. Vào **Docker Hub → Account Settings → Personal Access Tokens** → tạo token mới
-2. Vào **GitHub repo → Settings → Secrets and variables → Actions**
-3. Thêm secret tên `DOCKERHUB_TOKEN` với giá trị là token vừa tạo
+- **Trigger**: push lên `main`, `dev`, `feature/*` hoặc pull request
+- **Backend job**: lint → test → docker build
+- **Frontend job**: lint → test → vite build → docker build
+- **Deploy job**: tự động deploy lên Render khi push lên `main`
 
 ---
 
-## 🔄 Cập nhật image khi có thay đổi code
+## 🐞 Incident Report
 
-### Nếu đã setup CI/CD
+Xem chi tiết tại [INCIDENT_REPORT.md](./INCIDENT_REPORT.md)
 
-```bash
-git add .
-git commit -m "update: mô tả thay đổi"
-git push
-```
-
-> GitHub Actions sẽ tự động build và push lên Docker Hub.
-
-### Nếu chưa có CI/CD (thủ công)
-
-```bash
-docker compose build
-docker compose push
-```
+| # | Hiện tượng | Layer | Nguyên nhân |
+|---|---|---|---|
+| 1 | `[DB] Init failed:` (message trống) | Application | File `.env` không nằm đúng thư mục `backend/` |
+| 2 | `ECONNREFUSED 127.0.0.1:5432` | Infrastructure | PostgreSQL container không expose port ra host |
+| 3 | `Failed to fetch` trên frontend | Network/CORS | Vite proxy sai port + CORS chặn cross-origin request |
 
 ---
 
@@ -211,18 +175,43 @@ docker compose push
 expense-tracker/
 ├── backend/
 │   ├── src/
+│   │   ├── server.js
+│   │   └── server.test.js
 │   ├── Dockerfile
+│   ├── .env.example
 │   └── package.json
 ├── frontend/
 │   ├── src/
+│   │   ├── App.jsx
+│   │   └── App.test.jsx
 │   ├── nginx.conf
 │   ├── Dockerfile
+│   ├── .env.example
 │   └── package.json
 ├── .github/
 │   └── workflows/
-│       └── docker.yml
+│       └── ci.yml
 ├── docker-compose.yml
+├── .env.example
+├── INCIDENT_REPORT.md
 └── README.md
+```
+
+---
+
+## 🛠️ Development (Local dev không dùng Docker)
+
+```bash
+# Backend
+cd backend
+cp .env.example .env   # chỉnh DATABASE_URL nếu cần
+npm install
+npm run dev            # chạy tại http://localhost:3002
+
+# Frontend (terminal khác)
+cd frontend
+npm install
+npm run dev            # chạy tại http://localhost:5173
 ```
 
 ---
@@ -232,4 +221,4 @@ expense-tracker/
 **Võ Minh Nhật**
 
 - GitHub: [@Just1ND](https://github.com/Just1ND/DevOps_VoMinhNhat_DAMH)
-- Docker Hub: [minhnhat2k44/expense-tracker]
+- Docker Hub: [minhnhat2k44/expense-tracker](https://hub.docker.com/repository/docker/minhnhat2k44/expense-tracker/general)
