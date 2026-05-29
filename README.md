@@ -6,11 +6,11 @@
 
 ## 🌐 Production URLs
 
-| Service     | URL                                                                                          |
-| ----------- | -------------------------------------------------------------------------------------------- |
-| Frontend    | https://devops-vominhnhat-damh-4.onrender.com                                                |
-| Backend API | https://devops-vominhnhat-damh-3.onrender.com/api/health                                     |
-| GitHub Repo | https://github.com/Just1ND/DevOps_VoMinhNhat_DAMH                                           |
+| Service     | URL                                                      |
+| ----------- | -------------------------------------------------------- |
+| Frontend    | https://devops-vominhnhat-damh-4.onrender.com            |
+| Backend API | https://devops-vominhnhat-damh-3.onrender.com/api/health |
+| GitHub Repo | https://github.com/Just1ND/DevOps_VoMinhNhat_DAMH        |
 
 ---
 
@@ -161,11 +161,11 @@ File `.github/workflows/ci.yml` tự động chạy khi push code:
 
 Xem chi tiết tại [INCIDENT_REPORT.md](./INCIDENT_REPORT.md)
 
-| # | Hiện tượng | Layer | Nguyên nhân |
-|---|---|---|---|
-| 1 | `[DB] Init failed:` (message trống) | Application | File `.env` không nằm đúng thư mục `backend/` |
-| 2 | `ECONNREFUSED 127.0.0.1:5432` | Infrastructure | PostgreSQL container không expose port ra host |
-| 3 | `Failed to fetch` trên frontend | Network/CORS | Vite proxy sai port + CORS chặn cross-origin request |
+| #   | Hiện tượng                          | Layer          | Nguyên nhân                                          |
+| --- | ----------------------------------- | -------------- | ---------------------------------------------------- |
+| 1   | `[DB] Init failed:` (message trống) | Application    | File `.env` không nằm đúng thư mục `backend/`        |
+| 2   | `ECONNREFUSED 127.0.0.1:5432`       | Infrastructure | PostgreSQL container không expose port ra host       |
+| 3   | `Failed to fetch` trên frontend     | Network/CORS   | Vite proxy sai port + CORS chặn cross-origin request |
 
 ---
 
@@ -201,18 +201,114 @@ expense-tracker/
 
 ## 🛠️ Development (Local dev không dùng Docker)
 
-```bash
-# Backend
-cd backend
-cp .env.example .env   # chỉnh DATABASE_URL nếu cần
-npm install
-npm run dev            # chạy tại http://localhost:3002
+> Yêu cầu: Node.js 20+, Docker Desktop (để chạy DB)
 
-# Frontend (terminal khác)
-cd frontend
-npm install
-npm run dev            # chạy tại http://localhost:5173
+### Bước 1 — Khởi động Database
+
+```bash
+# Chỉ start container DB (không cần chạy cả backend/frontend bằng Docker)
+docker compose up db -d
 ```
+
+### Bước 2 — Chạy Backend
+
+```bash
+cd backend
+cp .env.example .env      # lần đầu setup
+npm install               # lần đầu setup
+npm run dev               # dev server với hot-reload tại http://localhost:3002
+```
+
+| Lệnh           | Mô tả                                             |
+| -------------- | ------------------------------------------------- |
+| `npm run dev`  | Chạy server với nodemon (tự reload khi sửa code)  |
+| `npm start`    | Chạy server không có hot-reload (production mode) |
+| `npm run lint` | Kiểm tra lỗi code style bằng ESLint               |
+| `npm test`     | Chạy toàn bộ test bằng Jest                       |
+
+### Bước 3 — Chạy Frontend
+
+Mở terminal mới:
+
+```bash
+cd frontend
+npm install               # lần đầu setup
+npm run dev               # dev server tại http://localhost:5173
+```
+
+| Lệnh              | Mô tả                                          |
+| ----------------- | ---------------------------------------------- |
+| `npm run dev`     | Chạy Vite dev server tại http://localhost:5173 |
+| `npm run build`   | Build production bundle vào thư mục `dist/`    |
+| `npm run preview` | Preview bản build production tại local         |
+| `npm run lint`    | Kiểm tra lỗi code style bằng ESLint            |
+| `npm test`        | Chạy toàn bộ test bằng Vitest                  |
+
+### Chạy Test
+
+```bash
+# Test backend (Jest)
+cd backend
+npm test
+
+# Test frontend (Vitest)
+cd frontend
+npm test
+```
+
+---
+
+## 🌿 Git Workflow
+
+### Clone repo lần đầu
+
+```bash
+git clone https://github.com/Just1ND/DevOps_VoMinhNhat_DAMH.git
+cd DevOps_VoMinhNhat_DAMH
+```
+
+### Quy trình làm việc hàng ngày
+
+```bash
+# 1. Tạo nhánh mới từ dev
+git checkout dev
+git pull origin dev
+git checkout -b feature/ten-tinh-nang
+
+# 2. Sau khi code xong, kiểm tra thay đổi
+git status
+git diff
+
+# 3. Stage và commit
+git add .
+git commit -m "feat: mô tả ngắn gọn thay đổi"
+
+# 4. Push nhánh lên GitHub
+git push origin feature/ten-tinh-nang
+
+# 5. Tạo Pull Request lên nhánh dev trên GitHub
+```
+
+### Các lệnh Git thường dùng
+
+```bash
+git status                        # xem file nào đã thay đổi
+git log --oneline -10             # xem 10 commit gần nhất
+git diff                          # xem chi tiết thay đổi chưa stage
+git stash                         # lưu tạm thay đổi chưa commit
+git stash pop                     # lấy lại thay đổi đã stash
+git pull origin dev               # cập nhật code mới nhất từ nhánh dev
+```
+
+### Quy ước đặt tên commit
+
+| Prefix      | Dùng khi                                        |
+| ----------- | ----------------------------------------------- |
+| `feat:`     | Thêm tính năng mới                              |
+| `fix:`      | Sửa bug                                         |
+| `docs:`     | Cập nhật tài liệu                               |
+| `ci:`       | Thay đổi CI/CD pipeline                         |
+| `refactor:` | Refactor code, không thêm tính năng hay sửa bug |
 
 ---
 
